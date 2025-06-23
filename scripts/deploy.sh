@@ -27,9 +27,10 @@ npm ci
 echo "🔨 Building the project..."
 npm run build
 
-# Add build files to git
+# Add build files to git (force add dist folder even if ignored)
 echo "📁 Adding build files to git..."
 git add -A
+git add -f dist/
 
 # Check if there are changes to commit
 if git diff --staged --quiet; then

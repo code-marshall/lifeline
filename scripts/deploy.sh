@@ -78,6 +78,8 @@ if git stash list | grep -q "Auto-stash before deploy"; then
     git stash pop
 fi
 
+npm install
+
 echo "✅ Build and deploy completed successfully!"
 echo "📍 Release branch has been updated with clean build files in root"
 echo "🌐 Perfect for GitHub Pages or static hosting deployment" 

@@ -40,6 +40,8 @@ npm run build
 # Clean up: remove everything except dist folder
 echo "🧹 Cleaning up - removing all files except dist..."
 find . -maxdepth 1 -not -name '.' -not -name '..' -not -name '.git' -not -name 'dist' -exec rm -rf {} + 2>/dev/null || true
+# Also clean up any remaining cache folders
+rm -rf .vite node_modules 2>/dev/null || true
 
 # Move everything from dist to root
 echo "📁 Moving build files from dist to root..."
@@ -66,6 +68,8 @@ git push origin release --force
 
 # Switch back to original branch
 echo "🔄 Switching back to $CURRENT_BRANCH branch..."
+# Clean up any remaining files that might prevent checkout
+rm -rf .vite node_modules 2>/dev/null || true
 git checkout "$CURRENT_BRANCH"
 
 # Restore stashed changes if any

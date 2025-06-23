@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { differenceInWeeks, differenceInYears, parseISO, isValid } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Calendar, Clock, Heart, AlertTriangle } from 'lucide-react';
@@ -9,6 +9,7 @@ function App() {
   const [expectedYears, setExpectedYears] = useState(75);
   const [lifeData, setLifeData] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const tabsRef = useRef(null);
 
   const calculateLifeData = () => {
     if (!dateOfBirth) return;
@@ -55,6 +56,16 @@ function App() {
 
   const handleCalculate = () => {
     calculateLifeData();
+
+    // Scroll to tabs section after calculation to show results
+    setTimeout(() => {
+      if (tabsRef.current) {
+        tabsRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
 
   const weekData = lifeData ? [
@@ -192,7 +203,7 @@ function App() {
 
         {lifeData && (
           <>
-            <div className="tabs-container">
+            <div className="tabs-container" ref={tabsRef}>
               <div className="tabs">
                 <button
                   className={`tab ${activeTab === 'overview' ? 'active' : ''}`}

@@ -11,9 +11,19 @@ echo "🚀 Starting build and deploy process..."
 CURRENT_BRANCH=$(git symbolic-ref --short HEAD)
 echo "📍 Current branch: $CURRENT_BRANCH"
 
-# Stash any uncommitted changes
-echo "💾 Stashing any uncommitted changes..."
-git stash push -m "Auto-stash before deploy $(date)"
+# Commit any uncommitted changes in main first
+echo "💾 Committing any changes in main branch..."
+git add -A
+if git diff --staged --quiet; then
+    echo "ℹ️  No changes to commit in main"
+else
+    git commit -m "Auto-commit before deploy: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "✅ Changes committed in main branch"
+fi
+
+# Stash any remaining uncommitted changes
+echo "💾 Stashing any remaining uncommitted changes..."
+git stash push -m "Auto-stash before deploy $(date)" || echo "No changes to stash"
 
 # Create and switch to release branch
 echo "🌿 Creating/switching to release branch..."
@@ -27,10 +37,19 @@ npm ci
 echo "🔨 Building the project..."
 npm run build
 
-# Add build files to git (force add dist folder even if ignored)
+# Clean up: remove everything except dist folder
+echo "🧹 Cleaning up - removing all files except dist..."
+find . -maxdepth 1 -not -name '.' -not -name '..' -not -name '.git' -not -name 'dist' -exec rm -rf {} + 2>/dev/null || true
+
+# Move everything from dist to root
+echo "📁 Moving build files from dist to root..."
+mv dist/* . 2>/dev/null || true
+mv dist/.* . 2>/dev/null || true  # Move hidden files if any
+rmdir dist 2>/dev/null || true   # Remove empty dist folder
+
+# Add all files to git
 echo "📁 Adding build files to git..."
 git add -A
-git add -f dist/
 
 # Check if there are changes to commit
 if git diff --staged --quiet; then
@@ -56,5 +75,5 @@ if git stash list | grep -q "Auto-stash before deploy"; then
 fi
 
 echo "✅ Build and deploy completed successfully!"
-echo "📍 Release branch has been updated with the latest build"
-echo "🌐 You can now use the 'release' branch for deployment" 
+echo "📍 Release branch has been updated with clean build files in root"
+echo "🌐 Perfect for GitHub Pages or static hosting deployment" 
